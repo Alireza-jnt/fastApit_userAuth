@@ -1,0 +1,38 @@
+services:
+  mongodb:
+    image: mongo:8.0.13
+    container_name: auth_mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: auth_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - auth_network
+
+  app:
+    build: .
+    container_name: auth_app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://root:password@mongodb:27017
+      - DATABASE_NAME=auth_db
+    depends_on:
+      - mongodb
+    networks:
+      - auth_network
+    volumes:
+      - ./app:/app
+
+volumes:
+  mongodb_data:
+
+networks:
+  auth_network:
+    driver: bridge
